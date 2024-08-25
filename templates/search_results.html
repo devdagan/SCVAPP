@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .table th:first-child, .table td:first-child {
+        width: 40px;
+        text-align: center;
+    }
+    .table th:nth-child(2), .table td:nth-child(2) {
+        width: 40px;
+    }
+    .form-check-input {
+        margin-top: 0;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="search-header">
+        <h2>Search Results: {{ search.search_name }}</h2>
+        <button type="submit" class="btn btn-danger" form="downloadForm">Download Selected</button>
+    </div>
+    
+    <div class="mb-3">
+        <strong>Search Parameters:</strong> 
+        Job Title: {{ search.job_title }}, 
+        Location: {{ search.location }}, 
+        Keywords: {{ search.keywords }}
+    </div>
+    
+    <form id="downloadForm" method="POST" action="{{ url_for('download_selected_cvs') }}">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" class="form-check-input" aria-label="Select All">
+                    </th>
+                    <th>#</th>
+                    <th>Email</th>
+                    <th>Job Title</th>
+                    <th>Location</th>
+                    <th>Keywords</th>
+                    <th>Upload Date</th>
+                    <th>Source</th>
+                    <th>View CV</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for idx, candidate in enumerate(candidates, 1) %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selected[]" value="{{ candidate.cv_file }}" class="form-check-input search-checkbox">
+                    </td>
+                    <td>{{ idx }}</td>
+                    <td>{{ candidate.email }}</td>
+                    <td>{{ candidate.job_title }}</td>
+                    <td>{{ candidate.location }}</td>
+                    <!-- <td>{{ candidate.keywords if candidate.keywords else 'N/A' }}</td> -->
+                    <td>{{ candidate.matched_keywords }}</td>
+                    <td>{{ candidate.upload_date }}</td>
+                    <td>{{ candidate.source }}</td>
+                    <td>
+                        <a href="{{ url_for('uploaded_file', filename=candidate.cv_file) }}" target="_blank">
+                            View {{ candidate.file_type.upper() }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var selectAllCheckbox = document.getElementById('selectAll');
+    var searchCheckboxes = document.getElementsByClassName('search-checkbox');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        for (var i = 0; i < searchCheckboxes.length; i++) {
+            searchCheckboxes[i].checked = selectAllCheckbox.checked;
+        }
+    });
+
+    for (var i = 0; i < searchCheckboxes.length; i++) {
+        searchCheckboxes[i].addEventListener('change', function() {
+            var allChecked = true;
+            for (var j = 0; j < searchCheckboxes.length; j++) {
+                if (!searchCheckboxes[j].checked) {
+                    allChecked = false;
+                    break;
+                }
+            }
+            selectAllCheckbox.checked = allChecked;
+        });
+    }
+});
+</script>
+
+{% endblock %}

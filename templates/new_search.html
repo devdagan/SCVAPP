@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}New Search{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2>Create a New Search</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="search_name" class="form-label">Search Name</label>
+            <input type="text" class="form-control" id="search_name" name="search_name" required>
+        </div>
+        
+        <!-- Job Title Autocomplete Field -->
+        <div class="mb-3">
+            <label for="job_title" class="form-label">Job Title</label>
+            <div id="jobTitleInputContainer" class="form-control d-flex flex-wrap align-items-center">
+                <div id="jobTitleTags" class="d-flex flex-wrap"></div>
+                <input type="text" id="jobTitleInput" style="border: none; outline: none; flex-grow: 1; min-width: 50px;">
+            </div>
+            <input type="hidden" id="job_title" name="job_title">
+        </div>
+
+        <!-- City Autocomplete Field -->
+        <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <div id="cityInputContainer" class="form-control d-flex flex-wrap align-items-center">
+                <div id="cityTags" class="d-flex flex-wrap"></div>
+                <input type="text" id="cityInput" style="border: none; outline: none; flex-grow: 1; min-width: 50px;">
+            </div>
+            <input type="hidden" id="location" name="location">
+        </div>
+
+        <!-- Keywords Autocomplete Field -->
+        <div class="mb-3">
+            <label for="keywords" class="form-label">Keywords (comma-separated)</label>
+            <div id="keywordInputContainer" class="form-control d-flex flex-wrap align-items-center">
+                <div id="keywordTags" class="d-flex flex-wrap"></div>
+                <input type="text" id="keywordInput" style="border: none; outline: none; flex-grow: 1; min-width: 50px;">
+            </div>
+            <input type="hidden" id="keywords" name="keywords">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Search</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<style>
+    .city-tag, .job-title-tag, .keyword-tag {
+        background-color: #e9ecef;
+        border-radius: 4px;
+        padding: 2px 8px;
+        margin: 2px;
+        display: inline-block;
+    }
+    #cityInputContainer, #jobTitleInputContainer, #keywordInputContainer {
+        cursor: text;
+    }
+    #cityInput:focus, #jobTitleInput:focus, #keywordInput:focus {
+        outline: none;
+    }
+</style>
+
+<script>
+$(function() {
+    // City Autocomplete Logic
+    var availableCities = {{ cities|tojson|safe }};
+    var selectedCities = [];
+
+    function capitalizeWords(str) {
+        return str.replace(/\w\S*/g, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
+
+    function addCityTag(city) {
+        var capitalizedCity = capitalizeWords(city);
+        if (!selectedCities.includes(capitalizedCity)) {
+            selectedCities.push(capitalizedCity);
+            $("#cityTags").append('<span class="city-tag">' + capitalizedCity + '</span>');
+            updateCityHiddenInput();
+        }
+    }
+
+    function updateCityHiddenInput() {
+        $("#location").val(selectedCities.join(", "));
+    }
+
+    function removeLastCity() {
+        if (selectedCities.length > 0) {
+            selectedCities.pop();
+            $("#cityTags .city-tag:last").remove();
+            updateCityHiddenInput();
+        }
+    }
+
+    $("#cityInput").on("keydown", function(event) {
+        if (event.keyCode === $.ui.keyCode.BACKSPACE) {
+            if ($(this).val() === "") {
+                removeLastCity();
+                event.preventDefault();
+            }
+        }
+    });
+
+    $("#cityInputContainer").on("click", function() {
+        $("#cityInput").focus();
+    });
+
+    $("#cityInput").autocomplete({
+        minLength: 0,
+        source: function(request, response) {
+            var term = request.term.toLowerCase();
+            var matching = availableCities.filter(function(city) {
+                return city.toLowerCase().indexOf(term) === 0 && !selectedCities.includes(capitalizeWords(city));
+            });
+            response(matching.map(capitalizeWords));
+        },
+        select: function(event, ui) {
+            addCityTag(ui.item.value);
+            $(this).val("");
+            return false;
+        }
+    }).on("autocompleteselect", function(event, ui) {
+        addCityTag(ui.item.value);
+        $(this).val("");
+        return false;
+    });
+
+    // Job Title Autocomplete Logic
+    var availableJobTitles = {{ job_titles|tojson|safe }};
+    var selectedJobTitles = [];
+
+    function addJobTitleTag(jobTitle) {
+        var capitalizedJobTitle = capitalizeWords(jobTitle);
+        if (!selectedJobTitles.includes(capitalizedJobTitle)) {
+            selectedJobTitles.push(capitalizedJobTitle);
+            $("#jobTitleTags").append('<span class="job-title-tag">' + capitalizedJobTitle + '</span>');
+            updateJobTitleHiddenInput();
+        }
+    }
+
+    function updateJobTitleHiddenInput() {
+        $("#job_title").val(selectedJobTitles.join(", "));
+    }
+
+    function removeLastJobTitle() {
+        if (selectedJobTitles.length > 0) {
+            selectedJobTitles.pop();
+            $("#jobTitleTags .job-title-tag:last").remove();
+            updateJobTitleHiddenInput();
+        }
+    }
+
+    $("#jobTitleInput").on("keydown", function(event) {
+        if (event.keyCode === $.ui.keyCode.BACKSPACE) {
+            if ($(this).val() === "") {
+                removeLastJobTitle();
+                event.preventDefault();
+            }
+        }
+    });
+
+    $("#jobTitleInputContainer").on("click", function() {
+        $("#jobTitleInput").focus();
+    });
+
+    $("#jobTitleInput").autocomplete({
+        minLength: 0,
+        source: function(request, response) {
+            var term = request.term.toLowerCase();
+            var matching = availableJobTitles.filter(function(jobTitle) {
+                return jobTitle.toLowerCase().indexOf(term) === 0 && !selectedJobTitles.includes(capitalizeWords(jobTitle));
+            });
+            response(matching.map(capitalizeWords));
+        },
+        select: function(event, ui) {
+            addJobTitleTag(ui.item.value);
+            $(this).val("");
+            return false;
+        }
+    }).on("autocompleteselect", function(event, ui) {
+        addJobTitleTag(ui.item.value);
+        $(this).val("");
+        return false;
+    });
+
+    // Keywords Logic
+    var selectedKeywords = [];
+
+    function addKeywordTag(keyword) {
+        var cleanedKeyword = keyword.trim();
+        if (cleanedKeyword && !selectedKeywords.includes(cleanedKeyword)) {
+            selectedKeywords.push(cleanedKeyword);
+            $("#keywordTags").append('<span class="keyword-tag">' + cleanedKeyword + '</span>');
+            updateKeywordHiddenInput();
+        }
+    }
+
+    function updateKeywordHiddenInput() {
+        $("#keywords").val(selectedKeywords.join(", "));
+    }
+
+    function removeLastKeyword() {
+        if (selectedKeywords.length > 0) {
+            selectedKeywords.pop();
+            $("#keywordTags .keyword-tag:last").remove();
+            updateKeywordHiddenInput();
+        }
+    }
+
+    $("#keywordInput").on("keydown", function(event) {
+        if (event.keyCode === $.ui.keyCode.COMMA || event.keyCode === $.ui.keyCode.ENTER) {
+            var keyword = $(this).val().replace(/,/g, '');
+            addKeywordTag(keyword);
+            $(this).val('');
+            event.preventDefault();
+        } else if (event.keyCode === $.ui.keyCode.BACKSPACE && $(this).val() === "") {
+            removeLastKeyword();
+            event.preventDefault();
+        }
+    });
+
+    $("#keywordInputContainer").on("click", function() {
+        $("#keywordInput").focus();
+    });
+
+    $("form").on("submit", function() {
+        updateCityHiddenInput();
+        updateJobTitleHiddenInput();
+        updateKeywordHiddenInput();
+    });
+});
+</script>
+
+{% endblock %}

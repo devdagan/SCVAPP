@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .table th:first-child, .table td:first-child {
+        width: 40px;
+        text-align: center;
+    }
+    .table th:nth-child(2), .table td:nth-child(2) {
+        width: 40px;
+    }
+    .form-check-input {
+        margin-top: 0;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="search-header">
+        <h2>Previous Searches</h2>
+        <button type="submit" class="btn btn-danger" form="deleteForm">Delete Selected</button>
+    </div>
+    
+    <form id="deleteForm" method="POST">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" class="form-check-input" aria-label="Select All">
+                    </th>
+                    <th>#</th>
+                    <th>Search Name</th>
+                    <th>Job Title</th>
+                    <th>Location</th>
+                    <th>Keywords</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for idx, search in searches %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selected[]" value="{{ search.search_name }}" class="form-check-input search-checkbox">
+                    </td>
+                    <td>{{ idx }}</td>
+                    <td>
+                        <a href="{{ url_for('search_results', search_name=search.search_name) }}">{{ search.search_name }}</a>
+                    </td>
+                    <td>{{ search.job_title }}</td>
+                    <td>{{ search.location }}</td>
+                    <td>{{ search.keywords }}</td>
+                    <td>{{ search.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var selectAllCheckbox = document.getElementById('selectAll');
+    var searchCheckboxes = document.getElementsByClassName('search-checkbox');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        for (var i = 0; i < searchCheckboxes.length; i++) {
+            searchCheckboxes[i].checked = selectAllCheckbox.checked;
+        }
+    });
+
+    for (var i = 0; i < searchCheckboxes.length; i++) {
+        searchCheckboxes[i].addEventListener('change', function() {
+            var allChecked = true;
+            for (var j = 0; j < searchCheckboxes.length; j++) {
+                if (!searchCheckboxes[j].checked) {
+                    allChecked = false;
+                    break;
+                }
+            }
+            selectAllCheckbox.checked = allChecked;
+        });
+    }
+});
+</script>
+
+{% endblock %}

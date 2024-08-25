@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+table {
+    font-size: 16px;
+}
+
+.form-control {
+    font-size: 16px;
+}
+
+#dropArea {
+    border: 2px dashed #007bff;
+    border-radius: 5px;
+    padding: 20px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+#dropArea.bg-light {
+    background-color: #f8f9fa;
+}
+
+#dropArea p {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #007bff;
+}
+
+#dropText {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+/* New Styles for the autocomplete tags */
+#jobTitleInputContainer, #locationInputContainer {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    min-height: 38px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#jobTitleTags .city-tag, #cityTags .city-tag {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+#jobTitleTags .city-tag:after, #cityTags .city-tag:after {
+    content: ' ×';
+    cursor: pointer;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+#jobTitleTags .city-tag:hover, #cityTags .city-tag:hover {
+    background-color: #0056b3;
+}
+
+#jobTitleInput, #cityInput {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    min-width: 50px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#jobTitleInput:focus, #cityInput:focus {
+    outline: none;
+}
+
+.city-tag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
